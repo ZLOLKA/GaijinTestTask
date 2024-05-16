@@ -12,6 +12,8 @@ class Settings {
     std::uint8_t percentSending_;
 
 public:
+    Settings();
+
     const decltype(keys_)& getKeys() const;
     std::size_t getRequestCount() const;
     std::uint8_t getPercentSending() const;
