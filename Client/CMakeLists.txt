@@ -8,3 +8,6 @@ add_executable(client ${client_src_files})
 
 target_include_directories(client PUBLIC "${PROJECT_SOURCE_DIR}/include/")
 
+find_package(Boost REQUIRED system)
+target_link_libraries(client ${Boost_LIBRARIES} pthread)
+
