@@ -120,7 +120,7 @@ void ConnectionTCP::handleSend() {
 void ConnectionTCP::processSetRequest() {
     const std::string key = parseKey();
     const std::string value = parseValue();
-    auto storage = KeyValueStorage::create(context_io_);
+    auto& storage = KeyValueStorage::create(context_io_);
     storage.async_set(
         key, value
         , boost::bind(&ConnectionTCP::handleWriteKVStorage, shared_from_this())

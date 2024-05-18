@@ -9,5 +9,7 @@ add_executable(server ${server_src_files})
 target_include_directories(server PUBLIC "${PROJECT_SOURCE_DIR}/include/")
 
 find_package(Boost REQUIRED system)
-target_link_libraries(server ${Boost_LIBRARIES} pthread)
+target_link_libraries(server
+    PUBLIC pthread
+)
 
