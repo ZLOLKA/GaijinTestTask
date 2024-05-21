@@ -2,6 +2,8 @@
 
 #include "ContextIO.hpp"
 
+#include "KeyValueParser.hpp"
+
 #include <boost/asio.hpp>
 
 #include <string>
@@ -11,8 +13,8 @@ namespace GaijinTestTask {
 class ConnectionTCP: public std::enable_shared_from_this<ConnectionTCP> {
     ContextIO context_io_;
     boost::asio::ip::tcp::socket socket_;
+    std::unique_ptr<KeyValueParser> parser_;
     std::string message_;
-    mutable decltype(std::cbegin(message_)) eq_it_;
 
 public:
     typedef std::shared_ptr<ConnectionTCP> pointer;
@@ -21,16 +23,11 @@ public:
     decltype(socket_)& getSocket();
     void start();
 
-protected:
-    std::string parseKey() const;
-    std::string parseValue() const;
-
 private:
     ConnectionTCP(ContextIO& context_io);
 
     void handleGet(const boost::system::error_code& error);
     void processNetError() const;
-    bool isHaveCorrectMsg() const;
     void processIncorrectMsg() const;
 
     void processGetRequest();
