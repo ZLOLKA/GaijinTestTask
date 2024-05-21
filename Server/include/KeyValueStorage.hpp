@@ -11,11 +11,7 @@ class KeyValueStorage {
 public:
     static KeyValueStorage& create(ContextIO& context_io);
 
-    void async_set(
-        const std::string& key
-        , const std::string& value
-        , std::function<void()> callback
-    );
+    void set(const std::string& key, const std::string& value);
     void async_get(
         const std::string& key, std::function<void(std::string)> callback
     ) const;

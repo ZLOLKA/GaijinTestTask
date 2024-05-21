@@ -38,7 +38,6 @@ private:
     void handleSend();
 
     void processSetRequest();
-    void handleWriteKVStorage();
 };  // class ConnectionTCP
 
 }  // namespace GaijinTestTask
