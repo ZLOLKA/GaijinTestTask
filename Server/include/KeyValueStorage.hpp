@@ -2,12 +2,26 @@
 
 #include "ContextIO.hpp"
 
+#include <boost/asio/random_access_file.hpp>
+#include <boost/asio/steady_timer.hpp>
+
 #include <functional>
+#include <shared_mutex>
 #include <string>
+#include <unordered_map>
 
 namespace GaijinTestTask {
 
-class KeyValueStorage {
+template<class T>
+T deserialize(const std::string& str);
+template<class T>
+std::string serialize(const T& value);
+
+class KeyValueStorage: public std::enable_shared_from_this<KeyValueStorage> {
+private:
+    struct Value;
+    using Cache = std::unordered_map<std::string, std::unique_ptr<Value>>;
+
 public:
     static KeyValueStorage& create(ContextIO& context_io);
 
@@ -17,10 +31,39 @@ public:
     ) const;
 
 private:
-    KeyValueStorage(ContextIO& context_io);
+    explicit KeyValueStorage(ContextIO& context_io);
+
+    void handleAsyncGet(
+        std::string key, std::function<void(std::string)> callback
+    ) const;
+
+    void handleTimer();
+    void write2File();
+    void handleWrite2File(boost::system::error_code err) const;
+
+private:
+    friend KeyValueStorage::Cache deserialize<KeyValueStorage::Cache>(
+        const std::string& str
+    );
+    friend std::string serialize<KeyValueStorage::Cache>(
+        const KeyValueStorage::Cache& cache
+    );
+
+private:
+    static std::string dropIncorrectChars(std::string str);
 
 private:
     ContextIO context_io_;
+    boost::asio::random_access_file file_;
+    std::string file_buffer_;
+    std::size_t read_count_;
+    std::size_t write_count_;
+
+    constexpr static std::chrono::seconds timer_period_{5};
+    boost::asio::steady_timer timer_;
+
+    mutable std::shared_mutex cache_mtx_;
+    Cache cache_;
 };  // class KeyValueStorage
 
 }  // namespace GaijinTestTask
