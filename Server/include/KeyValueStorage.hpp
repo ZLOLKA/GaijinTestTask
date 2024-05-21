@@ -18,9 +18,8 @@ template<class T>
 std::string serialize(const T& value);
 
 class KeyValueStorage: public std::enable_shared_from_this<KeyValueStorage> {
-private:
+public:
     struct Value;
-    using Cache = std::unordered_map<std::string, std::unique_ptr<Value>>;
 
 public:
     static KeyValueStorage& create(ContextIO& context_io);
@@ -29,6 +28,9 @@ public:
     void async_get(
         const std::string& key, std::function<void(std::string)> callback
     ) const;
+
+private:
+    using Cache = std::unordered_map<std::string, std::unique_ptr<Value>>;
 
 private:
     explicit KeyValueStorage(ContextIO& context_io);
