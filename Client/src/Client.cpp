@@ -29,6 +29,10 @@ std::string Client::sendGet(const std::string& key) const {
 void Client::sendStr(const std::string& str) const {
     boost::system::error_code err;
     socket_.send(boost::asio::buffer(str));
+    std::string response;
+    boost::asio::read_until(
+        socket_, boost::asio::dynamic_buffer(response), '\0', err
+    );
 }
 
 std::string Client::getStr() const {
@@ -36,7 +40,7 @@ std::string Client::getStr() const {
 
     std::string res;
     boost::system::error_code err;
-    boost::asio::read_until(socket_, boost::asio::dynamic_buffer(res), '\n', err);
+    boost::asio::read_until(socket_, boost::asio::dynamic_buffer(res), '\0', err);
     if(err && err != boost::asio::error::eof) {
         // TODO: Not processed error branch
         res = "TODO: Error branch: err=\""s + err.message() + '"';
