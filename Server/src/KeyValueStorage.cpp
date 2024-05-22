@@ -37,10 +37,9 @@ template<>
 std::string serialize<KeyValueStorage::Cache>(
     const KeyValueStorage::Cache& cache
 ) {
-    std::string res;
-    std::stringstream res_stream(res);
+    std::string res("");
     for(auto&[key, value]: cache) {
-        res_stream << "Set: " << key << "=" << value->value_ << std::endl;
+        res = res + "Set: " + key + "=" + value->value_ + "\n";
     }
     return res;
 }
