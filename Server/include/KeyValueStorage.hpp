@@ -43,7 +43,10 @@ private:
 
     void handleTimer();
     void write2File();
-    void handleWrite2File(boost::system::error_code err) const;
+    void handleWrite2File(
+        std::shared_ptr<std::string> ptr_file_buf
+        , boost::system::error_code err
+    ) const;
 
 private:
     friend KeyValueStorage::Cache deserialize<KeyValueStorage::Cache>(
@@ -59,7 +62,6 @@ private:
 private:
     ContextIO context_io_;
     boost::asio::random_access_file file_;
-    std::string file_buffer_;
     std::size_t read_count_;
     std::size_t write_count_;
 

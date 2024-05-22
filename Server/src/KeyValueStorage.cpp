@@ -86,16 +86,17 @@ void KeyValueStorage::init() {
     ));
 
     boost::system::error_code err;
-    file_buffer_.resize(file_.size(err));
+    std::string file_buffer;
+    file_buffer.resize(file_.size(err));
     boost::asio::read_at(
         file_
-        , 0, boost::asio::buffer(file_buffer_)
+        , 0, boost::asio::buffer(file_buffer)
         , boost::asio::transfer_all(), err
     );
     if(err && err != boost::asio::error::eof) {
         throw std::runtime_error("File \""s + filename_ + "\" does not open");
     }
-    cache_ = deserialize<KeyValueStorage::Cache>(file_buffer_);
+    cache_ = deserialize<KeyValueStorage::Cache>(file_buffer);
 }
 
 std::string KeyValueStorage::dropIncorrectChars(std::string str) {
@@ -152,18 +153,30 @@ void KeyValueStorage::handleTimer() {
 void KeyValueStorage::write2File() {
     std::scoped_lock lock(cache_mtx_);
 
-    file_buffer_ = std::move(serialize(cache_));
+    auto ptr_file_buf = std::make_shared<std::string>(serialize(cache_));
     file_.async_write_some_at(
-        0, boost::asio::buffer(file_buffer_)
+        0, boost::asio::buffer(*ptr_file_buf)
         , boost::bind(
             &KeyValueStorage::handleWrite2File
             , shared_from_this()
+            , ptr_file_buf
             , boost::asio::placeholders::error
         )
     );
 }
 
-void KeyValueStorage::handleWrite2File(boost::system::error_code err) const {
+void KeyValueStorage::handleWrite2File(
+    std::shared_ptr<std::string> ptr_file_buf
+    , boost::system::error_code err
+) const {
+    if (err && err != boost::asio::error::eof) {
+        boost::asio::post(
+            *(context_io_.console_io_context)
+            , [err](){
+                std::cout << err.what() << std::endl;
+            }
+        );
+    }
 }
 
 void KeyValueStorage::async_get(
