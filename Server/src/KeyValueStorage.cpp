@@ -102,7 +102,7 @@ void KeyValueStorage::handleTimer() {
     std::size_t old_read_count = read_count_;
     std::size_t old_write_count = write_count_;
     read_count_ = std::reduce(
-        cache_.begin(), cache_.end(), 0
+        cache_.begin(), cache_.end(), std::size_t(0)
         , [](std::size_t res, decltype(*cache_.begin())& el) -> std::size_t {
             return res + el.second->info_.read_count_.load(
                 std::memory_order_relaxed
@@ -110,7 +110,7 @@ void KeyValueStorage::handleTimer() {
         }
     );
     write_count_ = std::reduce(
-        cache_.begin(), cache_.end(), 0
+        cache_.begin(), cache_.end(), std::size_t(0)
         , [](std::size_t res, decltype(*cache_.begin())& el) -> std::size_t {
             return res + el.second->info_.write_count_;
         }
