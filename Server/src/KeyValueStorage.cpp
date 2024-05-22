@@ -40,7 +40,7 @@ std::string serialize<KeyValueStorage::Cache>(
     std::string res;
     std::stringstream res_stream(res);
     for(auto&[key, value]: cache) {
-        res_stream << key << "=" << value->value_ << std::endl;
+        res_stream << "Set: " << key << "=" << value->value_ << std::endl;
     }
     return res;
 }
