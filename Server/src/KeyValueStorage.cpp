@@ -74,6 +74,7 @@ KeyValueStorage::KeyValueStorage(ContextIO& context_io)
         , filename_
         , boost::asio::file_base::read_write
     )
+    , read_count_(0), write_count_(0)
     , timer_(*context_io_.console_io_context, timer_period_)
 {
 }
@@ -134,8 +135,8 @@ void KeyValueStorage::handleTimer() {
         ](){
             std::cout
                 << "All:"
-                << " r=" << std::to_string(old_read_count) << ";"
-                << " w=" << std::to_string(old_write_count) << ";"
+                << " r=" << std::to_string(read_count) << ";"
+                << " w=" << std::to_string(write_count) << ";"
                 << "Last " << timer_period_.count() << ":"
                 << " r=" << std::to_string(read_count - old_read_count) << ";"
                 << " w=" << std::to_string(write_count - old_write_count) << ";"
