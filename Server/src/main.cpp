@@ -30,7 +30,11 @@ static void startWork(boost::asio::io_context& contx) {
 
 int main()
 try {
-    GaijinTestTask::ContextIO context_io;
+    GaijinTestTask::ContextIO context_io{
+        std::make_shared<boost::asio::io_context>()
+        , std::make_shared<boost::asio::io_context>()
+        , std::make_shared<boost::asio::io_context>()
+    };
     GaijinTestTask::ServerTCP server(context_io);
 
     const std::size_t hardware_thread_count = std::thread::hardware_concurrency();
