@@ -55,6 +55,7 @@ void ConnectionTCP::handleGet(
     else {
         processSetRequest();
     }
+    start();
 }
 
 void ConnectionTCP::processNetError() const {
