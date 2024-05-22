@@ -70,12 +70,11 @@ template<>
 std::string serialize<KeyValueStorage::Value::ValueInfo>(
     const KeyValueStorage::Value::ValueInfo& value
 ) {
-    std::string res;
-    std::stringstream res_stream(res);
-    res_stream
-        << "; r=" << value.read_count_.load(std::memory_order_relaxed)
-        << "; w=" << value.write_count_
-        << ";"
+    std::string res("");
+    res = res
+        + "; r=" + std::to_string(value.read_count_.load(std::memory_order_relaxed))
+        + "; w=" + std::to_string(value.write_count_)
+        + ";"
     ;
     return res;
 }
