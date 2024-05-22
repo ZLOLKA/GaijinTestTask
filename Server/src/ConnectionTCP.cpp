@@ -18,10 +18,12 @@ auto ConnectionTCP::getSocket() -> decltype(ConnectionTCP::socket_)& {
 }
 
 void ConnectionTCP::start() {
-    boost::asio::async_read(socket_, boost::asio::buffer(message_)
+    auto msg = std::make_shared<std::string>();
+    boost::asio::async_read(socket_, boost::asio::buffer(*msg)
         , boost::bind(
             &ConnectionTCP::handleGet
             , shared_from_this()
+            , msg
             , boost::asio::placeholders::error
         )
     );
@@ -32,21 +34,23 @@ ConnectionTCP::ConnectionTCP(ContextIO& context_io)
 {
 }
 
-void ConnectionTCP::handleGet(const boost::system::error_code& error) {
+void ConnectionTCP::handleGet(
+    std::shared_ptr<std::string> msg, const boost::system::error_code& error
+) {
     if(error != boost::asio::error::eof) {
         processNetError();
         return;
     }
 
-    parser_ = std::make_unique<KeyValueParser>(message_);
+    parser_ = std::make_unique<KeyValueParser>(*msg);
     if(not parser_->isHaveCorrectMsg()) {
         processIncorrectMsg();
         return;
     }
 
-    if(*std::begin(message_) == 'G')
+    if(*std::begin(*msg) == 'G')
     {
-        processGetRequest();
+        processGetRequest(msg);
     }
     else {
         processSetRequest();
@@ -61,7 +65,7 @@ void ConnectionTCP::processIncorrectMsg() const {
     // TODO: Error incorrect msg
 }
 
-void ConnectionTCP::processGetRequest() {
+void ConnectionTCP::processGetRequest(std::shared_ptr<std::string> msg) {
     const std::string key = parser_->parseKey();
     auto& storage = KeyValueStorage::create(context_io_);
     storage.async_get(
@@ -69,21 +73,25 @@ void ConnectionTCP::processGetRequest() {
         , boost::bind(
             &ConnectionTCP::handleReadKVStorage
             , shared_from_this()
+            , msg
             , boost::placeholders::_1
         )
     );
 }
 
-void ConnectionTCP::handleReadKVStorage(std::string value) {
-    message_ = value;
+void ConnectionTCP::handleReadKVStorage(
+    std::shared_ptr<std::string> msg, std::string value
+) {
+    *msg = value;
     boost::asio::async_write(
         socket_
-        , boost::asio::buffer(message_)
-        , boost::bind(&ConnectionTCP::handleSend, shared_from_this())
+        , boost::asio::buffer(*msg)
+        , boost::bind(&ConnectionTCP::handleSend, shared_from_this(), msg)
     );
 }
 
-void ConnectionTCP::handleSend() {
+void ConnectionTCP::handleSend(std::shared_ptr<std::string> msg) {
+    socket_.send(boost::asio::buffer(*msg));
 }
 
 void ConnectionTCP::processSetRequest() {
