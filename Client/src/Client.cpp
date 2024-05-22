@@ -16,13 +16,13 @@ Client::Client(std::string ip_str, std::size_t port)
 void Client::sendSet(const std::string& key, const std::string& value) const {
     using namespace std::string_literals;
 
-    sendStr("Set "s + key + "=" + value);
+    sendStr("Set: "s + key + "=" + value + '\n');
 }
 
 std::string Client::sendGet(const std::string& key) const {
     using namespace std::string_literals;
 
-    sendStr("Get "s + key);
+    sendStr("Get: "s + key + '\n');
     return getStr();
 }
 
