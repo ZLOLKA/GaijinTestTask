@@ -6,14 +6,11 @@ namespace GaijinTestTask {
 
 Client::Client(std::string ip_str, std::size_t port)
     : io_context_()
-    , acceptor_(
-        io_context_
-        , boost::asio::ip::tcp::endpoint(
-            boost::asio::ip::make_address(ip_str), port
-        )
-    )
     , socket_(io_context_)
 {
+    boost::asio::ip::tcp::resolver resolver(io_context_);
+    auto endpoints = resolver.resolve(ip_str, std::to_string(port));
+    boost::asio::connect(socket_, endpoints);
 }
 
 void Client::sendSet(const std::string& key, const std::string& value) const {
@@ -31,7 +28,7 @@ std::string Client::sendGet(const std::string& key) const {
 
 void Client::sendStr(const std::string& str) const {
     boost::system::error_code err;
-    boost::asio::write(socket_, boost::asio::buffer(str), err);
+    socket_.send(boost::asio::buffer(str));
 }
 
 std::string Client::getStr() const {
@@ -39,8 +36,8 @@ std::string Client::getStr() const {
 
     std::string res;
     boost::system::error_code err;
-    std::size_t len = socket_.read_some(boost::asio::buffer(res), err);
-    if(err != boost::asio::error::eof) {
+    boost::asio::read_until(socket_, boost::asio::dynamic_buffer(res), '\n', err);
+    if(err && err != boost::asio::error::eof) {
         // TODO: Not processed error branch
         res = "TODO: Error branch: err=\""s + err.message() + '"';
     }

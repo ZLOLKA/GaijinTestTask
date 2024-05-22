@@ -9,7 +9,6 @@ namespace GaijinTestTask {
 
 class Client {
     boost::asio::io_context io_context_;
-    boost::asio::ip::tcp::acceptor acceptor_;
     mutable boost::asio::ip::tcp::socket socket_;
 
 public:
