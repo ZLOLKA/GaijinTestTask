@@ -19,7 +19,7 @@ auto ConnectionTCP::getSocket() -> decltype(ConnectionTCP::socket_)& {
 
 void ConnectionTCP::start() {
     auto msg = std::make_shared<std::string>();
-    boost::asio::async_read(socket_, boost::asio::buffer(*msg)
+    boost::asio::async_read_until(socket_, boost::asio::dynamic_buffer(*msg), '\n'
         , boost::bind(
             &ConnectionTCP::handleGet
             , shared_from_this()
@@ -37,7 +37,7 @@ ConnectionTCP::ConnectionTCP(ContextIO& context_io)
 void ConnectionTCP::handleGet(
     std::shared_ptr<std::string> msg, const boost::system::error_code& error
 ) {
-    if(error != boost::asio::error::eof) {
+    if(error && error != boost::asio::error::eof) {
         processNetError();
         return;
     }
