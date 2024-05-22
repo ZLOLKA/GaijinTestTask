@@ -10,9 +10,9 @@ namespace GaijinTestTask {
 class ServerTCP : public std::enable_shared_from_this<ServerTCP> {
 public:
     ServerTCP(ContextIO& context_io);
+    void start_accept();
 
 private:
-    void start_accept();
     void handle_accept(
         ConnectionTCP::pointer new_connection
         , const boost::system::error_code& error

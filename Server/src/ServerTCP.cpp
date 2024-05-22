@@ -15,7 +15,6 @@ ServerTCP::ServerTCP(ContextIO& context_io)
         *context_io.net_io_context, asio_tcp::endpoint(asio_tcp::v4(), 1700)
     )
 {
-    start_accept();
 }
 
 void ServerTCP::start_accept() {
