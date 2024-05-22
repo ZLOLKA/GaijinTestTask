@@ -83,7 +83,7 @@ void ConnectionTCP::processGetRequest(std::shared_ptr<std::string> msg) {
 void ConnectionTCP::handleReadKVStorage(
     std::shared_ptr<std::string> msg, std::string value
 ) {
-    *msg = value;
+    *msg = value + '\0';
     boost::asio::async_write(
         socket_
         , boost::asio::buffer(*msg)
@@ -100,6 +100,9 @@ void ConnectionTCP::processSetRequest() {
     const std::string value = parser_->parseValue();
     auto& storage = KeyValueStorage::create(context_io_);
     storage.set(key, value);
+    std::string buf = "";
+    buf = '\0';
+    socket_.send(boost::asio::buffer(buf));
 }
 
 }  // namespace GaijinTestTask
