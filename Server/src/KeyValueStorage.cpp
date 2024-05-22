@@ -71,7 +71,7 @@ KeyValueStorage::KeyValueStorage(ContextIO& context_io)
     : context_io_(context_io)
     , file_(
         *context_io_.fs_io_context
-        , "config.txt"
+        , filename_
         , boost::asio::file_base::read_write
     )
     , timer_(*context_io_.console_io_context, timer_period_)
@@ -79,10 +79,22 @@ KeyValueStorage::KeyValueStorage(ContextIO& context_io)
 }
 
 void KeyValueStorage::init() {
+    using namespace std::string_literals;
+
     timer_.async_wait(boost::bind(
         &KeyValueStorage::handleTimer, shared_from_this()
     ));
-    file_.read_some_at(0, boost::asio::buffer(file_buffer_));
+
+    boost::system::error_code err;
+    file_buffer_.resize(file_.size(err));
+    boost::asio::read_at(
+        file_
+        , 0, boost::asio::buffer(file_buffer_)
+        , boost::asio::transfer_all(), err
+    );
+    if(err && err != boost::asio::error::eof) {
+        throw std::runtime_error("File \""s + filename_ + "\" does not open");
+    }
     cache_ = deserialize<KeyValueStorage::Cache>(file_buffer_);
 }
 

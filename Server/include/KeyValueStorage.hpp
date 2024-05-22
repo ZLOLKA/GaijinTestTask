@@ -20,6 +20,7 @@ std::string serialize(const T& value);
 class KeyValueStorage: public std::enable_shared_from_this<KeyValueStorage> {
 public:
     struct Value;
+    constexpr static inline const char* filename_ = "config.txt";
 
 public:
     static KeyValueStorage& create(ContextIO& context_io);
