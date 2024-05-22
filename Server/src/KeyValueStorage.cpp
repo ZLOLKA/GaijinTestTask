@@ -47,6 +47,7 @@ std::string serialize<KeyValueStorage::Cache>(
 
 KeyValueStorage& KeyValueStorage::create(ContextIO& context_io) {
     static std::atomic<KeyValueStorage*> obj_ = nullptr;
+    static std::shared_ptr<KeyValueStorage> ptr;
 
     if(obj_.load(std::memory_order_acquire) == nullptr) {
         auto* obj_new = new KeyValueStorage(context_io);
@@ -56,6 +57,11 @@ KeyValueStorage& KeyValueStorage::create(ContextIO& context_io) {
             , std::memory_order_seq_cst, std::memory_order_acquire
         )) {
             delete obj_new;
+        } else {
+            ptr = std::shared_ptr<KeyValueStorage>(
+                obj_.load(std::memory_order_acquire)
+            );
+            ptr->init();
         }
     }
     return *(obj_.load(std::memory_order_relaxed));
@@ -70,6 +76,9 @@ KeyValueStorage::KeyValueStorage(ContextIO& context_io)
     )
     , timer_(*context_io_.console_io_context, timer_period_)
 {
+}
+
+void KeyValueStorage::init() {
     timer_.async_wait(boost::bind(
         &KeyValueStorage::handleTimer, shared_from_this()
     ));

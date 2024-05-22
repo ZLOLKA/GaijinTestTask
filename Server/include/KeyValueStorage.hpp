@@ -34,6 +34,7 @@ private:
 
 private:
     explicit KeyValueStorage(ContextIO& context_io);
+    void init();
 
     void handleAsyncGet(
         std::string key, std::function<void(std::string)> callback
