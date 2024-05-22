@@ -23,6 +23,11 @@ struct jthreader {
     }
 };  // struct jthreader
 
+static void startWork(boost::asio::io_context& contx) {
+    auto work = boost::asio::make_work_guard(contx);
+    contx.run();
+}
+
 int main()
 try {
     GaijinTestTask::ContextIO context_io;
@@ -37,16 +42,16 @@ try {
     for(std::size_t i = 0; i < thread_count; ++i) {
         threads.push_back(
             std::thread([net_io_context=context_io.net_io_context](){
-                net_io_context->run();
+                startWork(*net_io_context);
             })
         );
     }
     threads.push_back(
         std::thread([console_io_context=context_io.console_io_context](){
-            console_io_context->run();
+            startWork(*console_io_context);
         })
     );
-    context_io.fs_io_context->run();
+    startWork(*(context_io.fs_io_context));
 
     return 0;
 }
